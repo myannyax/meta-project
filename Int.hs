@@ -330,6 +330,7 @@ mkCAVar i = ((CVA i), i+1 )
 
 splitA :: CVar -> CExp -> Split
 splitA cv@(CVA _) caexp = (S[cv:->caexp], R (RESTR[cv:=/=:caexp]))
+splitA cv@(CVE _) caexp = (S[cv:->caexp], R (RESTR[cv:=/=:caexp]))
 
 splitE :: CVar -> FreeIndex -> (Split,FreeIndex)
 splitE cv@(CVE _) i = ((S[cv:->(CONS cvh cvt)], S[cv:->cva]), i')
@@ -375,6 +376,9 @@ ccond (EQA' x y) ce i =
                     (ATOM a, ATOM b) -> ((emptC, idC), [], [], i)
                     (CVA _, a)       -> (splitA x' a,  [], [], i)
                     (a, CVA _)       -> (splitA y' a,  [], [], i)
+                    (CVE _, a)       -> (splitA x' a,  [], [], i)
+                    (a, CVE _)       -> (splitA y' a,  [], [], i)
+                    otherwise -> error $ show (x', y')
 
 ccond (CONS' x vh vt va) ce i =
                 let x' = x/.ce in

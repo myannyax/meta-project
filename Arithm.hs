@@ -124,7 +124,10 @@ prog = [
           ),
           (DEFINE "PowKek" [_X, _Y, _RES]
             (ALT (CONS' _Y _Y_HEAD _Y_TAIL _Y_HEAD)
-              (CALL "PowKek" [_X, _Y_TAIL, (CONS _X _RES)])
+              (ALT (EQA' _Y_HEAD _ONE)
+                (CALL "PowKek" [_X, _Y_TAIL, (CONS _X _RES)])
+                (RETURN _FAILURE)
+              )
               (ALT (EQA' _Y_HEAD _EMPTY)
                 (ALT (CONS' _RES _X_HEAD _X_TAIL _X_HEAD)
                   (CALL "Multiplication" [_X_TAIL, _X_HEAD])
