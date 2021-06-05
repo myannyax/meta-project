@@ -1,4 +1,4 @@
-module Kek where
+module Arithm where
 
 import Int
 
@@ -18,8 +18,8 @@ prog = [
           (DEFINE "Main" [_OP, _X, _Y]
             (ALT (EQA' _OP _ADD)
               (CALL "AdditionRoot" [(CONS _X (CONS _Y _EMPTY)), _EMPTY, _EMPTY])
-              -- TODO: rewrite Multiplication for lists so it would be possible to implement pow
               (ALT (EQA' _OP _MULT)
+                -- for Multiplication the second argument can't be empty at the beginning
                 (CALL "Multiplication" [(CONS _X _EMPTY), _Y])
                 (ALT (EQA' _OP _POW)
                   -- for pow the second argument should be cons with n ones for the result to be x^n
@@ -41,7 +41,6 @@ prog = [
               )
             )
           ),
-          -- rem for temp res not rem (it's too hard for me to scroll down and make a new variable)
           (DEFINE "AdditionRootReverseHelper" [_LST_OP, _RES, _REM, _MULT_LST_OP]
             (ALT (CONS' _RES _X_HEAD _X_TAIL _X_HEAD)
               (CALL "AdditionRootReverseHelper" [_LST_OP, _X_TAIL, (CONS _X_HEAD _REM), _MULT_LST_OP])
@@ -75,8 +74,8 @@ prog = [
               )
             )
           ),
-          (DEFINE "Multiplication" [_LST_OP, _RES]
-            (ALT (CONS' _LST_OP _X_HEAD _X_TAIL _X_HEAD)
+          (DEFINE "Multiplication" [_MULT_LST_OP, _RES]
+            (ALT (CONS' _MULT_LST_OP _X_HEAD _X_TAIL _X_HEAD)
               (CALL "MultiplicationKek" [_X_HEAD, _RES, _EMPTY, _X_TAIL])
               (ALT (EQA' _X_HEAD _EMPTY)
                 (RETURN _RES)
@@ -170,4 +169,4 @@ prog = [
 b1674 = (CONS _ZERO (CONS _ONE (CONS _ZERO (CONS _ONE (CONS _ZERO (CONS _ZERO (CONS _ZERO (CONS _ONE (CONS _ZERO (CONS _ONE (CONS _ONE _EMPTY)))))))))))
 b374 = (CONS _ZERO (CONS _ONE (CONS _ONE (CONS _ZERO (CONS _ONE (CONS _ONE (CONS _ONE (CONS _ZERO (CONS _ONE _EMPTY)))))))))
 b2 = (CONS _ZERO (CONS _ONE _EMPTY))
-b6forPow = CONS _ONE (CONS _ONE (CONS _ONE (CONS _ONE _EMPTY)))
+b4forPow = CONS _ONE (CONS _ONE (CONS _ONE (CONS _ONE _EMPTY)))
