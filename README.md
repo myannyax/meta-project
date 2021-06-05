@@ -38,3 +38,17 @@ Int.int prog [_ADD, x, y]
 ```
 Алгоритм снова очевидно не завершился.
 Тут у меня str = 4, kek2 = 12 и в ответе 3, значит деление тоже работает! Правда даже на таких небольших числах алгоритм выдал этот класс уже за несколько минут.
+
+### Log (ну почти) через возведение в степень
+```
+*Arithm> Int.int prog [_POW, (CONS _ZERO (CONS _ONE _EMPTY)), (CONS _ONE (CONS _ONE (CONS _ONE (CONS _ONE _EMPTY))))]
+CONS (ATOM "0") (CONS (ATOM "0") (CONS (ATOM "0") (CONS (ATOM "0") (CONS (ATOM "1") (ATOM "Empty")))))
+*Arithm> kek2 = CONS (ATOM "0") (CONS (ATOM "0") (CONS (ATOM "0") (CONS (ATOM "0") (CONS (ATOM "1") (ATOM "Empty")))))
+*Arithm> str = (CONS _ZERO (CONS _ONE _EMPTY))
+*Arithm> x = ([_POW, str, (CVE 1)], RESTR [])
+*Arithm> Int.ura prog x kek2
+[([CVE 1 :-> CONS (ATOM "1") (CONS (ATOM "1") (CONS (ATOM "1") (CONS (ATOM "1") (ATOM "Empty"))))],RESTR [])
+```
+тут интепретатором посчитан ответ для 2^4 потом он использован чтобы найти степень 2 которая равна ему
+
+
