@@ -7,6 +7,7 @@ _ONE = ATOM "1"
 _ZERO = ATOM "0"
 _ADD = ATOM "A"
 _MULT = ATOM "M"
+_POW = ATOM "P"
 _EMPTY = ATOM "Empty"
 
 -- x, y - in reversed binary representation with _EMPTY at the end
@@ -19,8 +20,12 @@ prog = [
               (CALL "AdditionRoot" [(CONS _X (CONS _Y _EMPTY)), _EMPTY])
               -- TODO: rewrite Multiplication for lists so it would be possible to implement pow
               (ALT (EQA' _OP _MULT)
-                (CALL "Multiplication" [_X, _Y, _ZERO, _ZERO])
-                (RETURN _INVALID_OP)
+                (CALL "Multiplication" [(CONS _X _EMPTY), _Y])
+                (ALT (EQA' _OP _POW)
+                  -- for pow the second argument should be cons with n ones for the result to be x^n
+                  (CALL "Pow" [_X, _Y])
+                  (RETURN _INVALID_OP)
+                )
               )
             )
           ),
@@ -60,12 +65,21 @@ prog = [
                     (RETURN _FAILURE)
                   )
                 )
+                (RETURN _FAILURE2)
+              )
+            )
+          ),
+          (DEFINE "Multiplication" [_LST_OP, _RES]
+            (ALT (CONS' _LST_OP _X_HEAD _X_TAIL _X_HEAD)
+              (CALL "MultiplicationKek" [_X_HEAD, _RES, _EMPTY, _X_TAIL])
+              (ALT (EQA' _X_HEAD _EMPTY)
+                (RETURN _RES)
                 (RETURN _FAILURE)
               )
             )
           ),
-          (DEFINE "Multiplication" [_X, _Y]
-            (CALL "MultiplicationKek" [_X, _Y, _EMPTY])
+          (DEFINE "Pow" [_X, _Y]
+            (CALL "PowKek" [_X, _Y, _EMPTY])
           ),
           -- add _X_DIGIT to _Y_DIGIT and return reminder as _REM, res as _RES (it contains previous results, the current one us in the head),
           -- _X, _Y, _LST_OP are state helpers for recursion
@@ -94,21 +108,31 @@ prog = [
             )
           ),
           -- _RES for results from multiplication by 0 or 1 to be summurized later
-          (DEFINE "MultiplicationKek" [_X, _Y, _RES]
+          (DEFINE "MultiplicationKek" [_X, _Y, _RES, _LST_OP]
             (ALT (CONS' _Y _Y_HEAD _Y_TAIL _Y_HEAD)
-              (CALL "MultiplicationH" [_Y_HEAD, _X, _Y_TAIL, _RES])
+              (CALL "MultiplicationH" [_Y_HEAD, _X, _Y_TAIL, _RES, _LST_OP])
               (ALT (EQA' _Y_HEAD _EMPTY)
-                (CALL "AdditionRoot" [_RES, _ZERO])
+                (CALL "AdditionRoot" [_RES, _EMPTY])
                 (RETURN _FAILURE)
               )
             )
           ),
-          (DEFINE "MultiplicationH" [_Y_DIGIT, _X, _Y, _RES]
+          (DEFINE "PowKek" [_X, _Y, _RES]
+            (ALT (CONS' _Y _Y_HEAD _Y_TAIL _Y_HEAD)
+              (CALL "PowKek" [_X, _Y_TAIL, (CONS _X _RES)])
+              (ALT (EQA' _Y_HEAD _EMPTY)
+                -- TODO change to root
+                (CALL "Multiplication" [_RES, _EMPTY])
+                (RETURN _FAILURE)
+              )
+            )
+          ),
+          (DEFINE "MultiplicationH" [_Y_DIGIT, _X, _Y, _RES, _LST_OP]
             (ALT (EQA' _Y_DIGIT _ZERO)
               -- return zero if x * 0
-              (CALL "MultiplicationKek" [(CONS _ZERO _X), _Y, (CONS _ZERO _RES)])
+              (CALL "MultiplicationKek" [(CONS _ZERO _X), _Y, (CONS (CONS _ZERO _EMPTY) _RES), _LST_OP])
               -- shift x if x * 1
-              (CALL "MultiplicationKek" [(CONS _ZERO _X), _Y, (CONS _X _RES)])
+              (CALL "MultiplicationKek" [(CONS _ZERO _X), _Y, (CONS _X _RES), _LST_OP])
             )
           )
       ]  where
@@ -129,6 +153,7 @@ prog = [
             _LST_OP = PVE "lstOp"
             _INVALID_OP = ATOM "InvalidOp"
             _FAILURE = ATOM "InvalidArgument"
+            _FAILURE2 = ATOM "InvalidArgumentKek"
 
 
 -- examples:
